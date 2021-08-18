@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tomcat.dbcp.dbcp2.DriverManagerConnectionFactory;
-
+import crud.db.conexao;
 @WebServlet ("/CadastroServlet")
 
 public class CadastroServlet extends HttpServlet {
@@ -45,28 +45,30 @@ public class CadastroServlet extends HttpServlet {
 	
 	
 	try {
-		Class.forName("org.postgresql.Driver");
-		String url = "jdbc:postgresql://ruby.db.elephantsql.com:5432/txnxyrim";
-		String userDB = "txnxyrim";
-		String passDB = "iqWWuiodXJm2s0DIifFqgNWy4Kth03ij";
+		conexao c = new conexao();
+		Connection cont = crud.db.conexao.conectar();
 		
+		if (cont !=null) {
+			
+			String sql ="INSERT INTO public.pessoa\r\n"
+					+ "(nome, email, dt_nasc, tel, sexo, tec, esco)\r\n"
+					+ "VALUES('"+nome+"', '"+email+"', '"+dt_nasc+"', '"+tel+"', '"+sexo+"', '"+tecnologia+"', '"+esco+"')";
+			
+			
+			
+			PreparedStatement pst = cont.prepareStatement(sql);
+			pst.execute();
+			saida.println("Cadastro efetuado");
+			pst.close();
+			cont.close();
+			
+		}else {
+			saida.println("Erro de Conexão");
+		}
 		
-		Connection cont = DriverManager.getConnection(url, userDB, passDB);
-		
-		String sql ="INSERT INTO public.pessoa\r\n"
-				+ "(nome, email, dt_nasc, tel, sexo, tec, esco)\r\n"
-				+ "VALUES('"+nome+"', '"+email+"', '"+dt_nasc+"', '"+tel+"', '"+sexo+"', '"+tecnologia+"', '"+esco+"')";
-		
-		
-		
-		PreparedStatement pst = cont.prepareStatement(sql);
-		pst.execute();
-		saida.println("Cadastro efetuado");
-		pst.close();
-		cont.close();
 		
 	} catch (Exception e) {
-		saida.println("Erro de Conexão");
+		e.printStackTrace();
 	}
 	saida.println("</html>");
 	}

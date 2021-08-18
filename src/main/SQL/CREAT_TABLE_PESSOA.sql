@@ -1,4 +1,4 @@
-create table pessoa(
+	create table pessoa(
 id SERIAL,
 Nome varchar(255),
 email varchar(255),
