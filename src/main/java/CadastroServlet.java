@@ -11,66 +11,60 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.jasper.tagplugins.jstl.core.If;
 import org.apache.tomcat.dbcp.dbcp2.DriverManagerConnectionFactory;
 import crud.db.conexao;
+import dao.PessoaDao;
+import model.pessoa;
 @WebServlet ("/CadastroServlet")
 
 public class CadastroServlet extends HttpServlet {
 	
 	protected void service(HttpServletRequest req,HttpServletResponse res) throws ServletException, IOException{
-		String nome = req.getParameter("Nome");
-		String email = req.getParameter("email");
-		String dt_nasc = req.getParameter("dt_nasc");
-		String tel = req.getParameter("tel");
-		String sexo = req.getParameter("sexo");
-		String[] tec = req.getParameterValues("tec");
-		String esco = req.getParameter("esco");
 		
-		PrintWriter saida = res.getWriter();
-		saida.println("<html>");
-		saida.println(nome);
-		saida.println(email);
-		saida.println(dt_nasc);
-		saida.println(tel);
-		saida.println(sexo);
-		String tecnologia ="";
-	
-		for (String t : tec) {
-				saida.println(t);
-				tecnologia += t+",";
-		}
-		saida.println(esco);
+		pessoa objP = new pessoa();
 		
-	
-	
-	
-	try {
-		conexao c = new conexao();
-		Connection cont = crud.db.conexao.conectar();
+		String acao = req.getParameter("acao");
 		
-		if (cont !=null) {
+		if (acao != null && acao.equals("apagar")) {
 			
-			String sql ="INSERT INTO public.pessoa\r\n"
-					+ "(nome, email, dt_nasc, tel, sexo, tec, esco)\r\n"
-					+ "VALUES('"+nome+"', '"+email+"', '"+dt_nasc+"', '"+tel+"', '"+sexo+"', '"+tecnologia+"', '"+esco+"')";
-			
-			
-			
-			PreparedStatement pst = cont.prepareStatement(sql);
-			pst.execute();
-			saida.println("Cadastro efetuado");
-			pst.close();
-			cont.close();
-			
+			objP.setId(Integer.parseInt(req.getParameter("id")));
 		}else {
-			saida.println("Erro de Conexão");
+			
+			objP.setNome(req.getParameter("Nome"));
+			objP.setEmail(req.getParameter("email"));
+			objP.setDt_nasc(req.getParameter("dt_nasc"));
+			objP.setTel(req.getParameter("tel"));
+			objP.setSexo(req.getParameter("sexo"));
+			objP.setTec(req.getParameterValues("tec"));
+			objP.setEsco(req.getParameter("esco"));
+			objP.setCpf(req.getParameter("cpf"));
+			objP.setSenha(req.getParameter("senha"));
+			objP.setId(Integer.parseInt(req.getParameter("id")));
 		}
+
 		
+	PessoaDao objDao = new PessoaDao();
+	
+	boolean validar = false;
+	
+	if (objP.getId() > 0) {
 		
-	} catch (Exception e) {
-		e.printStackTrace();
-	}
-	saida.println("</html>");
+		if(acao != null && acao.equals("apagar")){
+			validar = objDao.apagar(objP.getId());
+		}else {
+		validar = objDao.alterar(objP);
+		}
+	}else {
+		validar = objDao.adicionar(objP);
+		}
+	
+	if (validar) {
+		res.sendRedirect("index.jsp");
 	}
 	
-}
+	}
+	
+
+		
+	}
